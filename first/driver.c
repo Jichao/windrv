@@ -58,8 +58,8 @@ NTSTATUS DriverDispatch(PDEVICE_OBJECT dev_obj, PIRP irp)
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
-			KdPrint(("dst file name %ws", src_filename));
 			LPCWSTR dst_filename = wcstok_s(NULL, L"|", &next_token);
+			KdPrint(("dst file name %ws", dst_filename));
 			if (!dst_filename) {
 				status = STATUS_INVALID_PARAMETER;
 				break;
@@ -67,7 +67,7 @@ NTSTATUS DriverDispatch(PDEVICE_OBJECT dev_obj, PIRP irp)
 			UNICODE_STRING ustr_src_filename = { 0 };
 			UNICODE_STRING ustr_dst_filename = { 0 };
 			RtlInitUnicodeString(&ustr_src_filename, src_filename);
-			RtlInitUnicodeString(&ustr_dst_filename, src_filename);
+			RtlInitUnicodeString(&ustr_dst_filename, dst_filename);
 			status = MyCopyFile(&ustr_dst_filename, &ustr_src_filename);
 		}
 		break;
@@ -101,9 +101,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT obj, PUNICODE_STRING regPath)
 	}
 
 	obj->DriverUnload = DriverUnload;
-	obj->MajorFunction[IRP_MJ_CREATE] = &DriverDispatch;
-	obj->MajorFunction[IRP_MJ_CLOSE] = &DriverDispatch;
-	obj->MajorFunction[IRP_MJ_DEVICE_CONTROL] = &DriverDispatch;
+	for (int i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; ++i) {
+		obj->MajorFunction[i] = &DriverDispatch;
+	}
 
 out:
 	return status;
