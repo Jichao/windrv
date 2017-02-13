@@ -2,7 +2,6 @@
 
 #define kMemTag 2333
 #define kControlDeviceName L"\\Device\\FirstHelloWorld"
-#define kSymbolName L"\\??\\FirstHelloWorld"
 
 #define kCopyFile CTL_CODE(FILE_DEVICE_UNKNOWN, 0x999, METHOD_BUFFERED, FILE_WRITE_DATA)
 
@@ -82,21 +81,13 @@ NTSTATUS DriverDispatch(PDEVICE_OBJECT dev_obj, PIRP irp)
 NTSTATUS DriverEntry(PDRIVER_OBJECT obj, PUNICODE_STRING regPath)
 {
 	UNREFERENCED_PARAMETER(regPath);
-	KdPrint(("current process id: %d, current thread id: %d\n", PsGetCurrentProcessId(), PsGetCurrentThreadId()));
 
 	NTSTATUS status = STATUS_SUCCESS;
 	UNICODE_STRING device_name = RTL_CONSTANT_STRING(kControlDeviceName);
-	UNICODE_STRING symbol_name = RTL_CONSTANT_STRING(kSymbolName);
 
 	status = IoCreateDevice(obj, 0, &device_name, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &g_cdo);
 	if (!NT_SUCCESS(status)) {
 		KdPrint(("create device failed"));
-		goto out;
-	}
-
-	status = IoCreateSymbolicLink(&symbol_name, &device_name);
-	if (!NT_SUCCESS(status)) {
-		KdPrint(("create symbol link failed"));
 		goto out;
 	}
 

@@ -1,0 +1,32 @@
+;
+; comfilt.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class="ActivityMonitor"
+ClassGuid={b86dff51-a31e-4bac-b3cf-e8cfe75c9fc3}
+Provider=Jichao
+DriverVer=
+CatalogFile=comfilt.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+
+
+[Strings]
+ManufacturerName=""
+ClassName=""
+DiskName="comfilt Source Disk"
