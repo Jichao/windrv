@@ -2,9 +2,9 @@
 #include "driverutils.h"
 
 NTSTATUS jjAttachDeviceByPointer(PDRIVER_OBJECT driver_object, PDEVICE_OBJECT target_object,
-	PDEVICE_OBJECT* pptarget_object, PDEVICE_OBJECT* pptop_dev)
+	PDEVICE_OBJECT* ppfilter_object, PDEVICE_OBJECT* pptop_dev)
 {
-	if ( !target_object || !pptarget_object || !pptop_dev) {
+	if ( !target_object || !ppfilter_object || !pptop_dev) {
 		return STATUS_INVALID_PARAMETER;
 	}
 
@@ -29,36 +29,54 @@ NTSTATUS jjAttachDeviceByPointer(PDRIVER_OBJECT driver_object, PDEVICE_OBJECT ta
 
 	*pptop_dev = IoAttachDeviceToDeviceStack(filter_object, target_object);
 	if (!*pptop_dev) {
-		*pptarget_object = NULL;
+		*ppfilter_object = NULL;
 		IoDeleteDevice(filter_object);
-		status = STATUS_INVALID_PARAMETER;
+		status = STATUS_UNSUCCESSFUL;
+		return status;
 	} else {
-		*pptarget_object = target_object;
+		*ppfilter_object = filter_object;
 	}
-
-	return status;
+	filter_object->Flags = filter_object->Flags & ~DO_DEVICE_INITIALIZING;
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS jjAttachDeviceByName(PDRIVER_OBJECT driver_object, LPCWSTR device_name,
-	PDEVICE_OBJECT* ppobj, PDEVICE_OBJECT* ppTopDev)
+	PDEVICE_OBJECT* ppfilter_object, PDEVICE_OBJECT* pptop_device)
 {
-	if (!ppobj || !ppTopDev || !device_name) {
+	if (!ppfilter_object || !pptop_device || !device_name) {
 		return STATUS_INVALID_PARAMETER;
 	}
 
-	PFILE_OBJECT file_object;
-	PDEVICE_OBJECT target_object;
-	UNICODE_STRING u8_device_name = { 0 };
-	NTSTATUS status = STATUS_SUCCESS;
+	*ppfilter_object = NULL;
+	*pptop_device = NULL;
 
-	RtlInitUnicodeString(&u8_device_name, device_name);
-	status = IoGetDeviceObjectPointer(&u8_device_name, FILE_ALL_ACCESS, &file_object, &target_object);
+	NTSTATUS status = STATUS_SUCCESS;
+	PDEVICE_OBJECT filter_object;
+	status = IoCreateDevice(driver_object, 0, NULL, FILE_DEVICE_UNKNOWN,
+		FILE_DEVICE_SECURE_OPEN, FALSE, &filter_object);
 	if (!NT_SUCCESS(status)) {
 		return status;
 	}
-	ObReferenceObject(target_object);
-	ObDereferenceObject(&file_object);
-	return jjAttachDeviceByPointer(driver_object, target_object, ppobj, ppTopDev);
+
+	UNICODE_STRING u8_device_name = { 0 };
+	RtlInitUnicodeString(&u8_device_name, device_name);
+	status = IoAttachDevice(filter_object, &u8_device_name, pptop_device);
+	if (!NT_SUCCESS(status)) {
+		IoDeleteDevice(filter_object);
+	} else {
+		if ((*pptop_device)->Flags & DO_BUFFERED_IO) {
+			filter_object->Flags |= DO_BUFFERED_IO;
+		}
+		if ((*pptop_device)->Flags & DO_DIRECT_IO) {
+			filter_object->Flags |= DO_DIRECT_IO;
+		}
+		if ((*pptop_device)->Characteristics & FILE_DEVICE_SECURE_OPEN) {
+			filter_object->Characteristics |= FILE_DEVICE_SECURE_OPEN;
+		}
+		filter_object->Flags |= DO_POWER_PAGABLE;
+	}
+	*ppfilter_object = filter_object;
+	return status;
 }
 
 NTSTATUS jjCopyFile(PUNICODE_STRING dstFilename, PUNICODE_STRING srcFilename)
