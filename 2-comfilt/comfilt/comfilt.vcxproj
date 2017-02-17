@@ -140,6 +140,9 @@
       <AdditionalLibraryDirectories>..\..\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>basecored.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy x64\debug\comfilt.sys \\desktop-uqj9scl\Users\jichao\Desktop /y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -11,7 +11,8 @@ NTSTATUS jjAttachDeviceByPointer(PDRIVER_OBJECT driver_object, PDEVICE_OBJECT ta
 	PDEVICE_OBJECT filter_object;
 	NTSTATUS status = STATUS_SUCCESS;
 
-	status = IoCreateDevice(driver_object, 0, NULL, target_object->DeviceType, 0, FALSE, &filter_object);
+	status = IoCreateDevice(driver_object, 0, NULL,
+		target_object->DeviceType, 0, FALSE, &filter_object);
 	if (!NT_SUCCESS(status)) {
 		return status;
 	}
