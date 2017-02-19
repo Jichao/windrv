@@ -1,1 +1,11 @@
 *.obj
+*.db
+*.suo
+*.opendb
+*.orig
+*.un~
+**/.vs
+**/ARM
+**/ipch
+**/x64
+
