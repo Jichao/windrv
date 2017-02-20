@@ -25,6 +25,7 @@ VOID mjDriverUnload(PDRIVER_OBJECT obj)
 	while (g_keyNum) {
 		KeDelayExecutionThread(KernelMode, TRUE, &delay);
 	}
+	UninitLogger();
 }
 
 NTSTATUS HookMajorFunction(PDRIVER_OBJECT driver_object)

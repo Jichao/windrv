@@ -157,6 +157,7 @@
     <ClCompile Include="callback_hook.c" />
     <ClCompile Include="class_hook.c" />
     <ClCompile Include="driver.c" />
+    <ClCompile Include="log.c" />
     <ClCompile Include="mj_hook.c" />
     <ClCompile Include="scancode.c" />
   </ItemGroup>

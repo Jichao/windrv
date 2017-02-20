@@ -4,8 +4,11 @@
 *.opendb
 *.orig
 *.un~
+*.swp
 **/.vs
 **/ARM
 **/ipch
 **/x64
+**/Debug
+**/Release
 

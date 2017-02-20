@@ -3,11 +3,17 @@
 #include <ntddkbd.h>
 #include "driver.h"
 
-int g_kDriverType = kDriverType_Callback;
+int g_kDriverType = kDriverType_Filter;
+
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT driver_object, PUNICODE_STRING regPath)
 {
 	UNREFERENCED_PARAMETER(regPath);
+	DbgBreakPoint();
+	NTSTATUS status = InitLogger();
+	if (!NT_SUCCESS(status))
+		return status;
+
 	if (g_kDriverType == kDriverType_Filter) {
 		driver_object->DriverUnload = classDriverUnload;
 		for (int i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; ++i) {
